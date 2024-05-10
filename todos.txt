@@ -1,0 +1,5 @@
+2. salts
+    if salts
+        append and prepend each salt string to each password from 10000 before hashing and comparing to input hash
+
+        
