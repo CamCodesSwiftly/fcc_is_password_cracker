@@ -29,16 +29,10 @@ def crack_sha1_hash(hash, use_salts = False):
 
     # check if the password is in the list
     if use_salts:
+        # salt the password list
         salts = read_salts()
-        salted_passwords = hash_passwords_with_salts(passwords, salts)
-
-        #TODO: did the appending/prepending go wrong?
-        print(hash)
-        print(passwords[salted_passwords.index(hash)])
-        if hash in salted_passwords:
-            return passwords[salted_passwords.index(hash)]
-        #TODO: did the appending/prepending go wrong?
-
+        result = hash_passwords_with_salts(passwords, salts, hash)
+        return result
     else:
         if hash in hashed_passwords:
             return passwords[hashed_passwords.index(hash)]
@@ -46,15 +40,19 @@ def crack_sha1_hash(hash, use_salts = False):
             return "PASSWORD NOT IN DATABASE"
 
 
-def hash_password_with_salt(password, salt):
-    combined = salt + password + salt
-    hashed = hashlib.sha1(combined.encode()).hexdigest()
-    return hashed
 
-def hash_passwords_with_salts(passwords, salts):
+
+def hash_passwords_with_salts(passwords, salts, hash):
     hashed_passwords = []
     for password in passwords:
+        salted = password
         for salt in salts:
-            hashed = hash_password_with_salt(password, salt)
-            hashed_passwords.append(hashed)
-    return hashed_passwords
+            left_salted = salt + salted
+            right_salted = salted + salt
+            hashed_left_salted = hashlib.sha1(left_salted.encode()).hexdigest()
+            hashed_right_salted = hashlib.sha1(right_salted.encode()).hexdigest()
+            if hashed_left_salted == hash or hashed_right_salted == hash:
+                return password
+    return False
+
+#cabd3202661a89b6fb4daa806c942113e44db847
